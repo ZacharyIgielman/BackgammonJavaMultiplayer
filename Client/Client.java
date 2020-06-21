@@ -1,67 +1,84 @@
-// Java implementation for multithreaded chat client 
-// Save file as Client.java 
-  
-import java.io.*; 
-import java.net.*; 
-import java.util.Scanner; 
-  
-public class Client  
-{ 
-    final static int ServerPort = 1234; 
-  
-    public static void main(String args[]) throws UnknownHostException, IOException  
-    { 
-        Scanner scn = new Scanner(System.in);
-        InetAddress ip = InetAddress.getByName("localhost");
-        Socket s = new Socket(ip, ServerPort);
-        DataInputStream dis = new DataInputStream(s.getInputStream()); 
-        DataOutputStream dos = new DataOutputStream(s.getOutputStream()); 
-  
+import java.io.*;
+import java.net.*;
 
-        Thread sendMessage = new Thread(new Runnable() { 
-            @Override
-            public void run() { 
-                try {
-                    while (true) {
-                        String msg = scn.nextLine(); 
-                        dos.writeUTF(msg); 
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace(); 
-                    scn.close();
-                    try {
-                        s.close();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
+
+public class Client {
+    private Socket _socket = null;
+    private PrintWriter _socketOutput = null;
+    private BufferedReader _socketInput = null;
+
+    private void makeConnection() {
+        try {
+            _socket = new Socket("localhost", 7777);
+            _socketOutput = new PrintWriter(_socket.getOutputStream(), true);
+            _socketInput = new BufferedReader(new InputStreamReader(_socket.getInputStream()));
+        } catch (Exception e) {
+            System.err.println("Couldn't reach host.");
+            System.exit(1);
+        }
+    }
+
+    private void closeConnection() {
+        try {
+            _socketOutput.close();
+            _socketInput.close();
+            _socket.close();
+        } catch (IOException e) {
+            System.err.println("I/O exception during execution");
+            System.exit(1);
+        }
+    }
+
+    private void startGame(String[] args) {
+        try {
+            if (args[0].equals("join")) {
+                _socketOutput.println("join " + args[1]);
+                String response = _socketInput.readLine();
+                if (!response.equals("ACCEPT")) {
+                    System.err.println(response);
                     System.exit(1);
                 }
-            } 
-        }); 
-
-        Thread readMessage = new Thread(new Runnable()  
-        { 
-            @Override
-            public void run() {  
-                try {
-                    while (true) { 
-                        String msg = dis.readUTF(); 
-                        System.out.println(msg);
-                    }
-                } catch (IOException e) { 
-                    e.printStackTrace(); 
-                    scn.close();
-                    try {
-                        s.close();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
+            } else if (args[0].equals("create")) {
+                _socketOutput.println("create " + args[1]);
+                String response = _socketInput.readLine();
+                if (!response.equals("ACCEPT")) {
+                    System.err.println(response);
                     System.exit(1);
-                } 
-            } 
-        });
+                }
+            } else {
+                System.err.println("Invalid command. Join or create game.");
+                System.exit(1);
+            }
+        } catch (IOException e) {
+            System.err.println("I/O exception during execution");
+            System.exit(1);
+        }
+    }
 
-        sendMessage.start(); 
-        readMessage.start(); 
-    } 
+    private void runGame() {
+        try {
+            System.out.println("Game!");
+            System.out.println(_socketInput.readLine());
+        } catch (IOException e) {
+            System.err.println("I/O exception during execution");
+            System.exit(1);
+        }
+    }
+
+    private void run(String[] args) {
+        makeConnection();
+        startGame(args);
+        runGame();
+        closeConnection();
+    }
+
+    public static void main(String[] args) {
+        if (args.length == 2) {
+            Client client = new Client();
+            client.run(args);
+        } else {
+            System.err.println("You must either join or create game");
+            System.exit(1);
+        }
+    }
 }

@@ -1,57 +1,30 @@
-import java.io.*; 
-import java.util.*; 
-import java.net.*; 
-  
-public class Server { 
-  
-    // Vector to store active clients 
-    static Vector<ClientHandler> ar = new Vector<>();
-  
-    public static void main(String[] args) throws IOException  {
-        ServerSocket ss = new ServerSocket(1234); 
-        Socket s; 
-          
-        while (true)  {
-            s = ss.accept();
-            DataInputStream dis = new DataInputStream(s.getInputStream()); 
-            DataOutputStream dos = new DataOutputStream(s.getOutputStream()); 
-            ClientHandler mtch = new ClientHandler(s, dis, dos); 
-            Thread t = new Thread(mtch);
-            t.start();
-            ar.add(mtch);
-        } 
-    } 
-} 
+import java.net.*;
+import java.io.*;
+import java.util.concurrent.*;
 
-class ClientHandler implements Runnable  
-{ 
-    Scanner scn = new Scanner(System.in);
-    final DataInputStream dis; 
-    final DataOutputStream dos; 
-    Socket s; 
-    boolean isloggedin; 
-      
-    // constructor 
-    public ClientHandler(Socket s, DataInputStream dis, DataOutputStream dos) { 
-        this.dis = dis; 
-        this.dos = dos;
-        this.s = s;
-        this.isloggedin=true;
-    } 
+public class Server {
+	private static final int kThreads = 20;
+	private static ServerSocket server = null;
+	private static ExecutorService service = null;
 
-    @Override
-    public void run() { 
-        String received; 
-        while (true) { 
-            try {
-                received = dis.readUTF();
-
-                for (ClientHandler mc : Server.ar) {
-                    mc.dos.writeUTF(received);
-                } 
-            } catch (IOException e) { 
-                e.printStackTrace(); 
-            } 
+    public static void main(String[] args) {
+        try {
+            server = new ServerSocket(7777);
+        } catch (IOException e) {
+            System.err.println("Could not listen on port: 7777.");
+            System.exit(1);
         }
-    } 
+
+		service = Executors.newFixedThreadPool(kThreads);
+		
+		while (true) {
+			try {
+				Socket client = server.accept();
+				service.submit(new ClientHandler(client));
+			} catch (IOException e) {
+				System.err.println("Problem retrieving client");
+				System.exit(1);
+			}
+		}
+    }
 }
