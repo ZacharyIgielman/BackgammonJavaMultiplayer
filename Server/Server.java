@@ -3,7 +3,6 @@ import java.io.*;
 import java.util.concurrent.*;
 
 public class Server {
-	private static final int kThreads = 20;
 	private static ServerSocket server = null;
 	private static ExecutorService service = null;
 
@@ -15,12 +14,12 @@ public class Server {
             System.exit(1);
         }
 
-		service = Executors.newFixedThreadPool(kThreads);
+		service = Executors.newCachedThreadPool();
 		
 		while (true) {
 			try {
 				Socket client = server.accept();
-				service.submit(new ClientHandler(client));
+				service.submit(new ClientHandler(client, service));
 			} catch (IOException e) {
 				System.err.println("Problem retrieving client");
 				System.exit(1);

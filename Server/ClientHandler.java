@@ -1,69 +1,59 @@
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 public class ClientHandler extends Thread {
-	private static Map<String,Socket> waitingGames = new HashMap<String,Socket>();
 
-	private Socket socket = null;
-	private PrintWriter out = null;
-	private BufferedReader in = null;
+	private static Map<String, ClientConnection> waitingGames = new HashMap<String, ClientConnection>();
+	private ClientConnection client = null;
+	private ExecutorService service = null;
 
-    public ClientHandler(Socket socket) {
+	public ClientHandler(Socket socket, ExecutorService service) {
 		super("ClientHandler");
-		this.socket = socket;
-	}
-
-	private void close() throws IOException {
-		out.close();
-	    in.close();
-		socket.close();
+		this.service = service;
+		try {
+			this.client = new ClientConnection(socket);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void create(String gameCode) throws IOException {
 		if (waitingGames.get(gameCode) == null) {
-			out.println("ACCEPT");
-			waitingGames.put(gameCode, socket);
-			out.close();
-	    	in.close();
+			client.out.println("ACCEPT");
+			waitingGames.put(gameCode, client);
 		} else {
-			out.println("Game code not available");
-			socket.close();
+			client.out.println("Game code not available");
+			client.close();
 		}
 	}
 
 	private void join(String gameCode) throws IOException {
 		if (waitingGames.get(gameCode) == null) {
-			out.println("Game code not available");
-			close();
+			client.out.println("Game code not available");
+			client.close();
 		} else {
-			out.println("ACCEPT");
-			out.close();
-	    	in.close();
-			BackgammonGame game = new BackgammonGame(socket, waitingGames.get(gameCode));
-			game.play();
+			client.out.println("ACCEPT");
+			service.submit(new BackgammonGame(client, waitingGames.get(gameCode)));
 		}
 	}
 
     public void run() {
 		try {
-	    	out = new PrintWriter(socket.getOutputStream(), true);
-			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			
-			String request[] = in.readLine().split("\\s+");
-
+			String request[] = client.in.readLine().split("\\s+");
 			if (request.length == 2) {
 				if (request[0].equals("join")) {
 					join(request[1]);
 				} else if (request[0].equals("create")) {
 					create(request[1]);
 				} else {
-					out.println("Invalid request");
-					close();
+					client.out.println("Invalid request");
+					client.close();
 				}
 			} else {
-				out.println("Invalid request");
-				close();
+				client.out.println("Invalid request");
+				client.close();
 			}
 		} catch (IOException e) {
 	    	e.printStackTrace();
