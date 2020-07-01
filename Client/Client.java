@@ -62,15 +62,17 @@ public class Client {
             System.out.println("Game!");
             //System.out.println(_socketInput.readLine());
             
-            JFrame frame = new JFrame("Mini Tennis");
+            JFrame frame = new JFrame("Backgammon");
             Board board = new Board();
 		    frame.add(board);
-		    frame.setSize(300, 400);
+		    frame.setSize(800, 720);
 		    frame.setVisible(true);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+            int[] state = new int[] {2,0,0,0,0,-5,0,-3,0,0,0,5,5,0,0,0,-3,0,-5,0,0,0,0,2};
             
             while (true) {
-                board.move();
+                board.updateState(state);
                 board.repaint();
                 Thread.sleep(10);
             }
