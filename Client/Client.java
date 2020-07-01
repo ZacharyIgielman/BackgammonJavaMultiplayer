@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.*;
 
+import javax.swing.JFrame;
+
 
 public class Client {
     private Socket _socket = null;
@@ -58,18 +60,31 @@ public class Client {
     private void runGame() {
         try {
             System.out.println("Game!");
-            System.out.println(_socketInput.readLine());
-        } catch (IOException e) {
-            System.err.println("I/O exception during execution");
+            //System.out.println(_socketInput.readLine());
+            
+            JFrame frame = new JFrame("Mini Tennis");
+            Board board = new Board();
+		    frame.add(board);
+		    frame.setSize(300, 400);
+		    frame.setVisible(true);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            
+            while (true) {
+                board.move();
+                board.repaint();
+                Thread.sleep(10);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             System.exit(1);
         }
     }
 
     private void run(String[] args) {
-        makeConnection();
-        startGame(args);
+        //makeConnection();
+        //startGame(args);
         runGame();
-        closeConnection();
+        //closeConnection();
     }
 
     public static void main(String[] args) {

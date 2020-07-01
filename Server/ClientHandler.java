@@ -35,7 +35,7 @@ public class ClientHandler extends Thread {
 			client.close();
 		} else {
 			client.out.println("ACCEPT");
-			service.submit(new BackgammonGame(client, waitingGames.get(gameCode)));
+			service.submit(new BackgammonGame(client, waitingGames.remove(gameCode)));
 		}
 	}
 
