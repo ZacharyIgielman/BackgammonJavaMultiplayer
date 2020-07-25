@@ -69,7 +69,7 @@ public class Client {
 		    frame.setVisible(true);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-            int[] state = new int[] {2,0,0,0,0,-5,0,-3,0,0,0,5,5,0,0,0,-3,0,-5,0,0,0,0,2};
+            int[] state = new int[] {2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2};
             
             while (true) {
                 board.updateState(state);
@@ -83,10 +83,10 @@ public class Client {
     }
 
     private void run(String[] args) {
-        //makeConnection();
-        //startGame(args);
+        makeConnection();
+        startGame(args);
         runGame();
-        //closeConnection();
+        closeConnection();
     }
 
     public static void main(String[] args) {
