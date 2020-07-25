@@ -4,6 +4,10 @@ import java.awt.Graphics;
 import java.awt.RenderingHints;
 import javax.swing.JOptionPane;
 import java.awt.Color;
+import java.awt.Shape;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.Polygon;
 
 
 public class Board extends JPanel {
@@ -17,9 +21,36 @@ public class Board extends JPanel {
 	
 	private int[] state = null;
 
+	private Shape[] shapes = new Shape[24];
+
 	public Board() {
 		setFocusable(true);
 		setBackground(new Color(193,154,107));
+
+		for (int i = 0; i < 6; i++ ) {
+			shapes[5 - i] = new Polygon(new int[] {(i + 8) * SPIKE_WIDTH, (i + 9) * SPIKE_WIDTH, (int)((i + ((float)17 / 2)) * SPIKE_WIDTH)},
+											new int[] {HEIGHT, HEIGHT, HEIGHT - SPIKE_HEIGHT}, 3);
+			shapes[11 - i] = new Polygon(new int[] {i * SPIKE_WIDTH, (i + 1) * SPIKE_WIDTH, (int)((i + ((float)1 / 2)) * SPIKE_WIDTH)},
+											new int[] {HEIGHT, HEIGHT, HEIGHT - SPIKE_HEIGHT}, 3);
+			shapes[12 + i] = new Polygon(new int[] {i * SPIKE_WIDTH, (i + 1) * SPIKE_WIDTH, (int)((i + ((float)1 / 2)) * SPIKE_WIDTH)},
+											new int[] {0, 0, SPIKE_HEIGHT}, 3);
+			shapes[18 + i] = new Polygon(new int[] {(i + 8) * SPIKE_WIDTH, (i + 9) * SPIKE_WIDTH, (int)((i + ((float)17 / 2)) * SPIKE_WIDTH)},
+											new int[] {0, 0, SPIKE_HEIGHT}, 3);
+		}
+
+		addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent me) {
+				super.mouseClicked(me);
+				int i = 0;
+                for (Shape s : shapes) {
+                    if (s.contains(me.getPoint())) {
+						System.out.println("Pressed " + i);
+					}
+					i++;
+                }
+            }
+        });
 	}
 
 	public void updateState(int[] state) {
@@ -34,40 +65,30 @@ public class Board extends JPanel {
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setColor(Color.white);
 
+		int i = 0;
+		for (Shape s : shapes) {
+			g2d.fill(s);
 
-		for (int i = 0; i < 6; i++ ) {
-			drawSpike(g2d, new int[] {i * SPIKE_WIDTH, (i + 1) * SPIKE_WIDTH, (int)((i + ((float)1 / 2)) * SPIKE_WIDTH)},
-						new int[] {0, 0, SPIKE_HEIGHT}, false, 12 + i);
-			drawSpike(g2d, new int[] {(i + 8) * SPIKE_WIDTH, (i + 9) * SPIKE_WIDTH, (int)((i + ((float)17 / 2)) * SPIKE_WIDTH)},
-						new int[] {0, 0, SPIKE_HEIGHT}, false, 18 + i);
+			Color previous = g2d.getColor();
+			if (state[i] > 0)
+			 	g2d.setColor(new Color(233,220,211));
+			else
+			 	g2d.setColor(new Color(173,134,87));
+			for (int j = 0; j < Math.abs(state[i]); j++) {
+			 	if (i < 12)
+			 		g2d.fillOval((int)s.getBounds2D().getX(), (int)HEIGHT - (int)((1.5 + j) * SPIKE_WIDTH), SPIKE_WIDTH, SPIKE_WIDTH);
+			 	else
+			 		g2d.fillOval((int)s.getBounds2D().getX(), j * SPIKE_WIDTH, SPIKE_WIDTH, SPIKE_WIDTH);
+			}
+			g2d.setColor(previous);
+
 			if (g2d.getColor().equals(Color.black)) {
 				g2d.setColor(Color.white);
 			} else {
 				g2d.setColor(Color.black);
 			}
-			drawSpike(g2d, new int[] {i * SPIKE_WIDTH, (i + 1) * SPIKE_WIDTH, (int)((i + ((float)1 / 2)) * SPIKE_WIDTH)},
-						new int[] {HEIGHT, HEIGHT, HEIGHT - SPIKE_HEIGHT}, true, 11 - i);
-			drawSpike(g2d, new int[] {(i + 8) * SPIKE_WIDTH, (i + 9) * SPIKE_WIDTH, (int)((i + ((float)17 / 2)) * SPIKE_WIDTH)},
-						new int[] {HEIGHT, HEIGHT, HEIGHT - SPIKE_HEIGHT}, true, 5 - i);
+			i++;
 		}
-	}
-
-	private void drawSpike(Graphics2D g2d, int[] x, int[] y, boolean up, int number) {
-		g2d.fillPolygon(x, y, 3);
-		Color previous = g2d.getColor();
-		if (state[number] > 0)
-			g2d.setColor(new Color(233,220,211));
-		else
-			g2d.setColor(new Color(173,134,87));
-		
-		for (int i = 0; i < Math.abs(state[number]); i++) {
-			if (up)
-				g2d.fillOval(x[0], (int)HEIGHT - (int)((1.5 + i) * SPIKE_WIDTH), SPIKE_WIDTH, SPIKE_WIDTH);
-			else
-				g2d.fillOval(x[0], i * SPIKE_WIDTH, SPIKE_WIDTH, SPIKE_WIDTH);
-		}
-		g2d.setColor(previous);
-
 	}
 	
 	public void gameOver() {

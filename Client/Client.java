@@ -83,10 +83,10 @@ public class Client {
     }
 
     private void run(String[] args) {
-        makeConnection();
-        startGame(args);
+        //makeConnection();
+        //startGame(args);
         runGame();
-        closeConnection();
+        //closeConnection();
     }
 
     public static void main(String[] args) {
