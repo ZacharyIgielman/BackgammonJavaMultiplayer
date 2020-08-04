@@ -8,9 +8,12 @@ import java.awt.Shape;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.Polygon;
+import java.io.*;
 
 
 public class Board extends JPanel {
+    private PrintWriter _socketOutput = null;
+    private BufferedReader _socketInput = null;
 
 	private final int HEIGHT = 720;
 	private final int WIDTH = 800;
@@ -23,7 +26,12 @@ public class Board extends JPanel {
 
 	private Shape[] shapes = new Shape[24];
 
-	public Board() {
+	public Board(BufferedReader in, PrintWriter out) {
+		_socketInput = in;
+		_socketOutput = out;
+
+		state = new int[] {2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2};
+
 		setFocusable(true);
 		setBackground(new Color(193,154,107));
 
@@ -51,10 +59,6 @@ public class Board extends JPanel {
                 }
             }
         });
-	}
-
-	public void updateState(int[] state) {
-		this.state = state;
 	}
 
 	@Override
@@ -94,5 +98,12 @@ public class Board extends JPanel {
 	public void gameOver() {
 		JOptionPane.showMessageDialog(this, "Game Over", "Game Over", JOptionPane.YES_NO_OPTION);
 		System.exit(ABORT);
+	}
+
+	public void run() throws Exception {
+		while (true) {
+			repaint();
+			Thread.sleep(10);
+		}
 	}
 }

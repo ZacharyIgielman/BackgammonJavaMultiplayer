@@ -60,22 +60,15 @@ public class Client {
     private void runGame() {
         try {
             System.out.println("Game!");
-            //System.out.println(_socketInput.readLine());
             
             JFrame frame = new JFrame("Backgammon");
-            Board board = new Board();
+            Board board = new Board(_socketInput, _socketOutput);
 		    frame.add(board);
 		    frame.setSize(800, 720);
 		    frame.setVisible(true);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-            int[] state = new int[] {2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2};
             
-            while (true) {
-                board.updateState(state);
-                board.repaint();
-                Thread.sleep(10);
-            }
+            board.run();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
@@ -83,10 +76,10 @@ public class Client {
     }
 
     private void run(String[] args) {
-        //makeConnection();
-        //startGame(args);
+        makeConnection();
+        startGame(args);
         runGame();
-        //closeConnection();
+        closeConnection();
     }
 
     public static void main(String[] args) {
