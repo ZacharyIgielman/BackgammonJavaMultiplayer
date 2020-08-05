@@ -59,15 +59,14 @@ public class Client {
 
     private void runGame() {
         try {
+            _socketInput.readLine();
             System.out.println("Game!");
-            
             JFrame frame = new JFrame("Backgammon");
             Board board = new Board(_socketInput, _socketOutput);
 		    frame.add(board);
 		    frame.setSize(800, 720);
 		    frame.setVisible(true);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            
             board.run();
         } catch (Exception e) {
             e.printStackTrace();

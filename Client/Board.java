@@ -9,6 +9,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.Polygon;
 import java.io.*;
+import javax.swing.JFrame;
 
 
 public class Board extends JPanel {
@@ -23,6 +24,7 @@ public class Board extends JPanel {
 	static final long serialVersionUID = 1l;
 	
 	private int[] state = null;
+	private int player;
 
 	private Shape[] shapes = new Shape[24];
 
@@ -101,9 +103,18 @@ public class Board extends JPanel {
 	}
 
 	public void run() throws Exception {
+		player = Integer.parseInt(_socketInput.readLine());
+		infoBox("Welcome player " + player);
+		JFrame frame = (JFrame)getTopLevelAncestor();
+		frame.setTitle("Player " + player);
+
 		while (true) {
 			repaint();
 			Thread.sleep(10);
 		}
 	}
+
+	private static void infoBox(String infoMessage) {
+        JOptionPane.showMessageDialog(null, infoMessage, "Backgammon", JOptionPane.INFORMATION_MESSAGE);
+    }
 }

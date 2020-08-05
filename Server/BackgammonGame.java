@@ -13,8 +13,10 @@ public class BackgammonGame extends Thread {
     }
 
     public void run() {
-        player1.out.println("Hello Player 1");
-        player2.out.println("Hello Player 2");
+        player1.out.println("Start");
+        player2.out.println("Start");
+        player1.out.println("1");
+        player2.out.println("2");
         try {
             player1.close();
             player2.close();
